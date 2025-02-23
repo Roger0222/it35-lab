@@ -13,14 +13,14 @@ import {
     return (
       <IonPage>
         <IonHeader>
-          <IonToolbar color="primary">
+          <IonToolbar>
             <IonButtons slot='start'>
-                <IonBackButton defaultHref='/it35-lab/app/home'></IonBackButton>
+              <IonMenuButton></IonMenuButton>
             </IonButtons>
             <IonTitle>Details</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonContent className='ion-padding'>
+        <IonContent fullscreen>
         </IonContent>
       </IonPage>
     );
