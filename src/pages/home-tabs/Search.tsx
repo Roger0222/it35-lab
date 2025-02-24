@@ -5,7 +5,8 @@ import {
       IonMenuButton, 
       IonPage, 
       IonTitle, 
-      IonToolbar 
+      IonToolbar,
+      IonSearchbar 
   } from '@ionic/react';
   
   const Search: React.FC = () => {
@@ -13,10 +14,14 @@ import {
       <IonPage>
         <IonHeader>
           <IonToolbar>
+            <IonTitle>Search</IonTitle>
+      </IonToolbar>
+      <IonToolbar>
+        <IonSearchbar></IonSearchbar>
             <IonButtons slot='start'>
               <IonMenuButton></IonMenuButton>
             </IonButtons>
-            <IonTitle>Search</IonTitle>
+            <IonTitle></IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent fullscreen>
