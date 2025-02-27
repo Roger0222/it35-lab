@@ -5,7 +5,10 @@ import {
       IonMenuButton, 
       IonPage, 
       IonTitle, 
-      IonToolbar 
+      IonToolbar,
+      IonItem,
+      IonLabel,
+      IonList 
   } from '@ionic/react';
   
   const Favorites: React.FC = () => {
@@ -20,8 +23,26 @@ import {
           </IonToolbar>
         </IonHeader>
         <IonContent fullscreen>
+        <IonList>
+      <IonItem>
+        <IonLabel>Climate Change</IonLabel>
+      </IonItem>
+      <IonItem>
+        <IonLabel>Cybercrimes</IonLabel>
+      </IonItem>
+      <IonItem>
+        <IonLabel>Philippine politics</IonLabel>
+      </IonItem>
+      <IonItem>
+        <IonLabel>New Social Media Trends</IonLabel>
+      </IonItem>
+      <IonItem>
+        <IonLabel>Effects of Overpopulation</IonLabel>
+      </IonItem>
+    </IonList>
         </IonContent>
       </IonPage>
+      
     );
   };
   
