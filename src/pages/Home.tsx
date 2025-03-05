@@ -20,6 +20,7 @@ import Favorites from './home-tabs/Favorites';
 import Feed from './home-tabs/Feed';
 import Search from './home-tabs/Search';
 import { bookOutline, search, star } from 'ionicons/icons';
+import Article from '../components/Article';
     
     const Home: React.FC = () => {
        const tabs=[
@@ -41,6 +42,7 @@ import { bookOutline, search, star } from 'ionicons/icons';
             </IonTabBar>
             <IonRouterOutlet>
               <Route exact path="/it35-lab/app/home/feed" render={Feed}/>
+              <Route exact path="/it35-lab/app/home/feed/article/:id" component={Article} />
               <Route exact path="/it35-lab/app/home/search" render={Search}/>
               <Route exact path="/it35-lab/app/home/favorites" render={Favorites}/>
               <Route exact path="/it35-lab/app/home">
