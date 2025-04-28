@@ -1,13 +1,12 @@
-import { 
+import {
   IonButtons,
-  IonContent, 
-  IonHeader, 
-  IonMenuButton, 
-  IonPage, 
-  IonTitle, 
-  IonToolbar, 
-  IonText, 
-  IonButton 
+  IonContent,
+  IonHeader,
+  IonMenuButton,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  IonText
 } from '@ionic/react';
 import FeedContainer from '../../components/FeedContainer';
 
@@ -58,7 +57,7 @@ const Feed: React.FC = () => {
           </IonText>
         </div>
 
-        {/* Styled Feed Container Wrapper (fixes the error) */}
+        {/* Styled Feed Container */}
         <div style={{ 
           marginTop: '20px', 
           padding: '20px', 
@@ -67,24 +66,6 @@ const Feed: React.FC = () => {
           boxShadow: '0 4px 8px rgba(0,0,0,0.3)' 
         }}>
           <FeedContainer />
-        </div>
-
-        {/* Post Button */}
-        <div style={{ textAlign: 'center', marginTop: '30px', marginBottom: '40px' }}>
-          <IonButton
-            expand="full"
-            color="primary"
-            style={{
-              backgroundColor: '#3880FF',
-              borderRadius: '25px',
-              padding: '12px 24px',
-              fontWeight: '700',
-              fontSize: '18px',
-              boxShadow: '0 6px 12px rgba(0,0,0,0.2)',
-            }}
-          >
-            Post Something
-          </IonButton>
         </div>
         
       </IonContent>
