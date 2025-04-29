@@ -163,6 +163,50 @@ const EditAccount: React.FC = () => {
         </IonButtons>
       </IonHeader>
       <IonContent className="ion-padding">
+
+        {/* Cover Photo + Avatar */}
+        <div style={{ position: 'relative', textAlign: 'center', marginBottom: '60px' }}>
+          <img
+            src="https://scontent.fcgm1-1.fna.fbcdn.net/v/t39.30808-6/485837823_1880744942744200_8027559809547031743_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=101&ccb=1-7&_nc_sid=669761&_nc_eui2=AeEJgvlrZcNL6dio_3jbfATBZdcn62pDFUdl1yfrakMVR-FqH6GvOYowebbsVhzpYMeZk-v9GhBmCfj-mnlTZmzG&_nc_ohc=XNIBTSpb94cQ7kNvwFLY_GV&_nc_oc=AdlVdhvFmeAImI4tAiGLubY4NPHppbQxaWgbzkLaQccxs4dYIBoHvUns-WlR3X86C5M&_nc_zt=23&_nc_ht=scontent.fcgm1-1.fna&_nc_gid=h8N5Q3QhUPglPoolULJ_jw&oh=00_AfH1gp_cbYgmfG_spO0jWZtyXGyIZWpYLdMH5wEOtfNMOw&oe=6816A839"
+            alt="Cover"
+            style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '10px' }}
+          />
+          {avatarPreview && (
+            <IonAvatar
+              style={{
+                width: '120px',
+                height: '120px',
+                position: 'absolute',
+                bottom: '-60px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                border: '4px solid white',
+                boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+              }}
+            >
+              <IonImg
+                src={avatarPreview}
+                onIonImgDidLoad={() => setAvatarLoaded(true)}
+                style={{ objectFit: 'cover' }}
+              />
+            </IonAvatar>
+          )}
+        </div>
+
+        <div style={{ marginTop: '70px', textAlign: 'center' }}>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            accept="image/*"
+            onChange={handleAvatarChange}
+          />
+          <IonButton expand="block" onClick={() => fileInputRef.current?.click()} fill="outline">
+            Upload Avatar
+          </IonButton>
+        </div>
+
+        {/* Edit Form */}
         <IonCard className="ion-no-margin ion-padding">
           <IonCardContent>
             <IonText color="primary">
@@ -170,38 +214,6 @@ const EditAccount: React.FC = () => {
             </IonText>
 
             <IonGrid>
-              <IonRow className="ion-justify-content-center ion-margin-top">
-                <IonCol className="ion-text-center">
-                  {avatarPreview && (
-                    <IonAvatar
-                      style={{
-                        width: '150px',
-                        height: '150px',
-                        margin: 'auto',
-                        opacity: avatarLoaded ? 1 : 0,
-                        transition: 'opacity 0.6s ease-in-out',
-                      }}
-                    >
-                      <IonImg
-                        src={avatarPreview}
-                        onIonImgDidLoad={() => setAvatarLoaded(true)}
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </IonAvatar>
-                  )}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                  />
-                  <IonButton expand="block" onClick={() => fileInputRef.current?.click()} className="ion-margin-top" fill="outline">
-                    Upload Avatar
-                  </IonButton>
-                </IonCol>
-              </IonRow>
-
               <IonRow>
                 <IonCol>
                   <IonInput
