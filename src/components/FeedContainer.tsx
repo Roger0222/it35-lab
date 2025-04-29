@@ -8,7 +8,7 @@ import {
 } from '@ionic/react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
-import { pencil, trash } from 'ionicons/icons';
+import { pencil, trash, ellipsisVertical } from 'ionicons/icons';
 
 interface Post {
   post_id: string;
@@ -26,6 +26,7 @@ const FeedContainer = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [popoverState, setPopoverState] = useState<{ open: boolean; event: Event | null; postId: string | null }>({ open: false, event: null, postId: null });
@@ -43,6 +44,7 @@ const FeedContainer = () => {
         if (!error && userData) {
           setUser({ ...authData.user, id: userData.user_id });
           setUsername(userData.username);
+          setUserAvatarUrl(userData.user_avatar_url || 'https://ionicframework.com/docs/img/demos/avatar.svg');
         }
       }
     };
@@ -122,37 +124,46 @@ const FeedContainer = () => {
       <IonPage>
         <IonHeader>
           <IonToolbar>
-            <IonTitle className="ion-text-center">Posts</IonTitle>
+            <IonTitle className="ion-text-center">Feed</IonTitle>
           </IonToolbar>
         </IonHeader>
 
         <IonContent className="ion-padding">
           {user ? (
             <>
-              <IonCard className="ion-margin">
-                <IonCardHeader>
-                  <IonCardTitle className="ion-text-center">Create Post</IonCardTitle>
-                </IonCardHeader>
+              <IonCard className="ion-margin-top">
                 <IonCardContent>
-                  <IonInput
-                    className="ion-margin-bottom"
-                    value={postContent}
-                    onIonChange={e => setPostContent(e.detail.value!)}
-                    placeholder="What's on your mind?"
-                    fill="outline"
-                  />
-                  <IonButton expand="block" onClick={createPost}>Post</IonButton>
+                  <IonGrid>
+                    <IonRow className="ion-align-items-center">
+                      <IonCol size="auto">
+                        <IonAvatar>
+                          <img src={userAvatarUrl} alt="User Avatar" />
+                        </IonAvatar>
+                      </IonCol>
+                      <IonCol>
+                        <IonInput
+                          value={postContent}
+                          onIonChange={e => setPostContent(e.detail.value!)}
+                          placeholder="What's on your mind?"
+                          fill="outline"
+                        />
+                      </IonCol>
+                    </IonRow>
+                    <IonRow className="ion-justify-content-end ion-padding-top">
+                      <IonButton expand="block" onClick={createPost}>Post</IonButton>
+                    </IonRow>
+                  </IonGrid>
                 </IonCardContent>
               </IonCard>
 
               {posts.map(post => (
-                <IonCard key={post.post_id} className="ion-margin">
+                <IonCard key={post.post_id} className="ion-margin-vertical">
                   <IonCardHeader>
                     <IonGrid>
                       <IonRow className="ion-align-items-center">
                         <IonCol size="auto">
                           <IonAvatar>
-                            <img alt={post.username} src={post.avatar_url} />
+                            <img src={post.avatar_url} alt="Avatar" />
                           </IonAvatar>
                         </IonCol>
                         <IonCol>
@@ -164,7 +175,7 @@ const FeedContainer = () => {
                             fill="clear"
                             onClick={(e) => setPopoverState({ open: true, event: e.nativeEvent, postId: post.post_id })}
                           >
-                            <IonIcon color="medium" icon={pencil} />
+                            <IonIcon icon={ellipsisVertical} />
                           </IonButton>
                         </IonCol>
                       </IonRow>
@@ -172,9 +183,7 @@ const FeedContainer = () => {
                   </IonCardHeader>
 
                   <IonCardContent>
-                    <IonText color="dark">
-                      <p>{post.post_content}</p>
-                    </IonText>
+                    <IonText>{post.post_content}</IonText>
                   </IonCardContent>
 
                   <IonPopover
@@ -207,7 +216,6 @@ const FeedContainer = () => {
           </IonHeader>
           <IonContent className="ion-padding">
             <IonInput
-              className="ion-margin-bottom"
               value={postContent}
               onIonChange={e => setPostContent(e.detail.value!)}
               placeholder="Edit your post..."
