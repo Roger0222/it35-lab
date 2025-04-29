@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     legacy()
   ],
-  base:"/it35-lab",
+  base: "/it35-lab/", // Important for GitHub Pages
   test: {
     globals: true,
     environment: 'jsdom',
