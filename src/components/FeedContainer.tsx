@@ -26,7 +26,7 @@ const FeedContainer = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string | null>(null);
-  const [userAvatarUrl, setUserAvatarUrl] = useState<string>('');
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string>('https://ionicframework.com/docs/img/demos/avatar.svg');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [popoverState, setPopoverState] = useState<{ open: boolean; event: Event | null; postId: string | null }>({ open: false, event: null, postId: null });
@@ -44,7 +44,7 @@ const FeedContainer = () => {
         if (!error && userData) {
           setUser({ ...authData.user, id: userData.user_id });
           setUsername(userData.username);
-          setUserAvatarUrl(userData.user_avatar_url || 'https://ionicframework.com/docs/img/demos/avatar.svg');
+          setUserAvatarUrl(userData.user_avatar_url || userAvatarUrl);
         }
       }
     };
@@ -75,7 +75,7 @@ const FeedContainer = () => {
       return;
     }
 
-    const avatarUrl = userData?.user_avatar_url || 'https://ionicframework.com/docs/img/demos/avatar.svg';
+    const avatarUrl = userData?.user_avatar_url || userAvatarUrl;
 
     const { data, error } = await supabase
       .from('posts')
@@ -123,15 +123,15 @@ const FeedContainer = () => {
     <IonApp>
       <IonPage>
         <IonHeader>
-          <IonToolbar>
-            <IonTitle className="ion-text-center">Feed</IonTitle>
+          <IonToolbar color="light">
+            <IonTitle className="ion-text-center" style={{ color: 'black' }}>Feed</IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        <IonContent className="ion-padding">
+        <IonContent className="ion-padding" style={{ backgroundColor: '#f3f4f6', color: 'black' }}>
           {user ? (
             <>
-              <IonCard className="ion-margin-top">
+              <IonCard style={{ background: '#ffffff', border: '1px solid #ccc', boxShadow: '2px 2px 5px rgba(0,0,0,0.1)', color: 'black' }}>
                 <IonCardContent>
                   <IonGrid>
                     <IonRow className="ion-align-items-center">
@@ -146,18 +146,19 @@ const FeedContainer = () => {
                           onIonChange={e => setPostContent(e.detail.value!)}
                           placeholder="What's on your mind?"
                           fill="outline"
+                          style={{ color: 'black' }}
                         />
                       </IonCol>
                     </IonRow>
                     <IonRow className="ion-justify-content-end ion-padding-top">
-                      <IonButton expand="block" onClick={createPost}>Post</IonButton>
+                      <IonButton onClick={createPost}>Post</IonButton>
                     </IonRow>
                   </IonGrid>
                 </IonCardContent>
               </IonCard>
 
               {posts.map(post => (
-                <IonCard key={post.post_id} className="ion-margin-vertical">
+                <IonCard key={post.post_id} style={{ background: '#ffffff', border: '1px solid #ccc', marginTop: '16px', color: 'black' }}>
                   <IonCardHeader>
                     <IonGrid>
                       <IonRow className="ion-align-items-center">
@@ -167,7 +168,7 @@ const FeedContainer = () => {
                           </IonAvatar>
                         </IonCol>
                         <IonCol>
-                          <IonCardTitle>{post.username}</IonCardTitle>
+                          <IonCardTitle style={{ color: 'black' }}>{post.username}</IonCardTitle>
                           <IonCardSubtitle>{new Date(post.post_created_at).toLocaleString()}</IonCardSubtitle>
                         </IonCol>
                         <IonCol size="auto">
@@ -183,7 +184,7 @@ const FeedContainer = () => {
                   </IonCardHeader>
 
                   <IonCardContent>
-                    <IonText>{post.post_content}</IonText>
+                    <IonText style={{ color: 'black' }}>{post.post_content}</IonText>
                   </IonCardContent>
 
                   <IonPopover
@@ -204,22 +205,23 @@ const FeedContainer = () => {
               ))}
             </>
           ) : (
-            <IonLabel>Loading...</IonLabel>
+            <IonLabel style={{ color: 'black' }}>Loading...</IonLabel>
           )}
         </IonContent>
 
         <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
           <IonHeader>
-            <IonToolbar>
+            <IonToolbar color="light">
               <IonTitle>Edit Post</IonTitle>
             </IonToolbar>
           </IonHeader>
-          <IonContent className="ion-padding">
+          <IonContent className="ion-padding" style={{ color: 'black' }}>
             <IonInput
               value={postContent}
               onIonChange={e => setPostContent(e.detail.value!)}
               placeholder="Edit your post..."
               fill="outline"
+              style={{ color: 'black' }}
             />
           </IonContent>
           <IonFooter className="ion-padding">
