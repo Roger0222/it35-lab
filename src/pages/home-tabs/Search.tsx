@@ -16,7 +16,7 @@ import {
             <IonButtons slot='start'>
               <IonMenuButton></IonMenuButton>
             </IonButtons>
-            <IonTitle>Search</IonTitle>
+            <IonTitle style={{ color: '#FFFFFF', fontSize: '26px', fontWeight: '700' }}>Search</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent fullscreen>

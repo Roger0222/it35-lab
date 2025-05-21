@@ -4,7 +4,8 @@ import {
   IonButton, IonInput, IonLabel, IonModal, IonFooter, IonCard,
   IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
   IonAlert, IonText, IonAvatar, IonCol, IonGrid, IonRow,
-  IonIcon, IonPopover, IonItem
+  IonIcon, IonPopover, IonItem,
+  IonButtons,IonMenuButton
 } from '@ionic/react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
@@ -123,7 +124,11 @@ const FeedContainer = () => {
       <IonPage>
         <IonHeader>
           <IonToolbar color="light">
-            <IonTitle className="ion-text-center" style={{ color: 'black' }}>Feed</IonTitle>
+            <IonButtons slot="start">
+                        <IonMenuButton color="light">
+                        </IonMenuButton>
+                      </IonButtons>
+            <IonTitle style={{ color: '#FFFFFF', fontSize: '26px', fontWeight: '700' }}>Feed</IonTitle>
           </IonToolbar>
         </IonHeader>
 
