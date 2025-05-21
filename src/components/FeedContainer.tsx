@@ -120,7 +120,6 @@ const FeedContainer = () => {
   };
 
   return (
-    <IonApp>
       <IonPage>
         <IonHeader>
           <IonToolbar color="light">
@@ -238,7 +237,6 @@ const FeedContainer = () => {
           buttons={['OK']}
         />
       </IonPage>
-    </IonApp>
   );
 };
 

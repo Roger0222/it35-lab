@@ -28,48 +28,87 @@ const AlertBox: React.FC<{ message: string; isOpen: boolean; onClose: () => void
 const ForgotPassword: React.FC = () => {
   const navigation = useIonRouter();
   const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetMode, setIsResetMode] = useState(false); // Toggle between email and password fields
 
   const handleResetPassword = async () => {
-    if (!email) {
-      setAlertMessage("Please enter your email address");
-      setShowAlert(true);
-      return;
-    }
-
-    // Basic email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setAlertMessage("Please enter a valid email address");
-      setShowAlert(true);
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/it35-lab/update-password`,
-      });
-
-      if (error) {
-        throw error;
+    if (!isResetMode) {
+      // Email submission phase
+      if (!email) {
+        setAlertMessage("Please enter your email address");
+        setShowAlert(true);
+        return;
       }
 
-      setShowToast(true);
-      setAlertMessage("Password reset link has been sent to your email. Please check your inbox.");
-      setShowAlert(true);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAlertMessage("Please enter a valid email address");
+        setShowAlert(true);
+        return;
+      }
+
+      setIsLoading(true);
       
-      // Clear the email field after successful submission
-      setEmail('');
-    } catch (error: any) {
-      console.error('Password reset error:', error);
-      setAlertMessage(error.message || "Failed to send reset link. Please try again.");
-      setShowAlert(true);
-    } finally {
-      setIsLoading(false);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/it35-lab/update-password`,
+        });
+
+        if (error) throw error;
+
+        setShowToast(true);
+        setAlertMessage("Password reset link sent. Check your email to proceed.");
+        setShowAlert(true);
+        setEmail('');
+      } catch (error: any) {
+        setAlertMessage(error.message || "Failed to send reset link.");
+        setShowAlert(true);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Password update phase
+      if (!newPassword || !confirmPassword) {
+        setAlertMessage("Please fill in all password fields");
+        setShowAlert(true);
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setAlertMessage("Passwords do not match");
+        setShowAlert(true);
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        setAlertMessage("Password must be at least 6 characters");
+        setShowAlert(true);
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+
+        if (error) throw error;
+
+        setShowToast(true);
+        setAlertMessage("Password updated successfully!");
+        setShowAlert(true);
+        navigation.push('/it35-lab', 'forward', 'replace');
+      } catch (error: any) {
+        setAlertMessage(error.message || "Password update failed");
+        setShowAlert(true);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -109,7 +148,7 @@ const ForgotPassword: React.FC = () => {
             fontSize: '22px',
             margin: '15px 0 0 0'
           }}>
-            Reset Password
+            {isResetMode ? 'Set New Password' : 'Reset Password'}
           </h1>
 
           <p style={{
@@ -119,25 +158,63 @@ const ForgotPassword: React.FC = () => {
             textAlign: 'center',
             maxWidth: '300px'
           }}>
-            Enter your email address to receive a password reset link
+            {isResetMode 
+              ? 'Enter your new password below' 
+              : 'Enter your email to receive a reset link'}
           </p>
 
-          <IonInput
-            label="Email"
-            labelPlacement="floating"
-            fill="outline"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onIonChange={e => setEmail(e.detail.value!)}
-            style={{
-              color: '#ffffff',
-              '--placeholder-color': '#a1a1aa',
-              '--color': '#ffffff',
-              width: '100%',
-              maxWidth: '400px'
-            }}
-          />
+          {!isResetMode ? (
+            <IonInput
+              label="Email"
+              labelPlacement="floating"
+              fill="outline"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onIonChange={e => setEmail(e.detail.value!)}
+              style={{
+                color: '#ffffff',
+                '--placeholder-color': '#a1a1aa',
+                '--color': '#ffffff',
+                width: '100%',
+                maxWidth: '400px'
+              }}
+            />
+          ) : (
+            <>
+              <IonInput
+                label="New Password"
+                labelPlacement="floating"
+                fill="outline"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onIonChange={e => setNewPassword(e.detail.value!)}
+                style={{
+                  color: '#ffffff',
+                  '--placeholder-color': '#a1a1aa',
+                  width: '100%',
+                  maxWidth: '400px'
+                }}
+              />
+
+              <IonInput
+                label="Confirm Password"
+                labelPlacement="floating"
+                fill="outline"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onIonChange={e => setConfirmPassword(e.detail.value!)}
+                style={{
+                  color: '#ffffff',
+                  '--placeholder-color': '#a1a1aa',
+                  width: '100%',
+                  maxWidth: '400px'
+                }}
+              />
+            </>
+          )}
 
           <IonButton
             onClick={handleResetPassword}
@@ -155,8 +232,26 @@ const ForgotPassword: React.FC = () => {
               '--background-hover': '#4d8eff'
             }}
           >
-            {isLoading ? 'SENDING...' : 'SEND RESET LINK'}
+            {isLoading 
+              ? 'PROCESSING...' 
+              : isResetMode ? 'UPDATE PASSWORD' : 'SEND RESET LINK'}
           </IonButton>
+
+          {!isResetMode && (
+            <IonButton
+              onClick={() => setIsResetMode(true)}
+              fill="clear"
+              style={{
+                color: '#3880ff',
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: 'normal',
+                '--background-activated': 'transparent'
+              }}
+            >
+              Already have a reset code? <b>Set Password</b>
+            </IonButton>
+          )}
 
           <IonButton
             routerLink="/it35-lab"
@@ -166,12 +261,10 @@ const ForgotPassword: React.FC = () => {
               textTransform: 'none',
               fontSize: '14px',
               fontWeight: 'normal',
-              '--background-activated': 'transparent',
-              '--background-focused': 'transparent',
-              '--background-hover': 'transparent'
+              '--background-activated': 'transparent'
             }}
           >
-            Back to  <b style={{ marginLeft: '4px' }}>LOGIN</b>
+            Back to <b>LOGIN</b>
           </IonButton>
         </div>
 
@@ -180,7 +273,7 @@ const ForgotPassword: React.FC = () => {
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
-          message="Reset link sent successfully!"
+          message={isResetMode ? "Password updated!" : "Reset link sent!"}
           duration={2000}
           position="top"
           color="success"
