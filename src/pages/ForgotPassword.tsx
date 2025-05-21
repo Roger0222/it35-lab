@@ -5,7 +5,6 @@ import {
   IonContent,
   IonIcon,
   IonInput,
-  IonInputPasswordToggle,
   IonPage,
   IonToast,
   useIonRouter
@@ -26,33 +25,52 @@ const AlertBox: React.FC<{ message: string; isOpen: boolean; onClose: () => void
   );
 };
 
-const Login: React.FC = () => {
+const ForgotPassword: React.FC = () => {
   const navigation = useIonRouter();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const doLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setAlertMessage(error.message);
+  const handleResetPassword = async () => {
+    if (!email) {
+      setAlertMessage("Please enter your email address");
       setShowAlert(true);
       return;
     }
 
-    setShowToast(true);
-    setTimeout(() => {
-      navigation.push('/it35-lab/app', 'forward', 'replace');
-    }, 800);
-  };
+    // Basic email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAlertMessage("Please enter a valid email address");
+      setShowAlert(true);
+      return;
+    }
 
-  const handleForgotPassword = () => {
-    // You can implement the forgot password logic here
-    setAlertMessage("Forgot password functionality will be implemented here");
-    setShowAlert(true);
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/it35-lab/update-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setShowToast(true);
+      setAlertMessage("Password reset link has been sent to your email. Please check your inbox.");
+      setShowAlert(true);
+      
+      // Clear the email field after successful submission
+      setEmail('');
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      setAlertMessage(error.message || "Failed to send reset link. Please try again.");
+      setShowAlert(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,8 +81,9 @@ const Login: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          marginTop: '25%',
-          gap: '1rem'
+          height: '100%',
+          gap: '1rem',
+          padding: '1rem'
         }}>
           <IonAvatar
             style={{
@@ -85,23 +104,22 @@ const Login: React.FC = () => {
           </IonAvatar>
 
           <h1 style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             color: '#ffffff',
             fontWeight: 'bold',
             fontSize: '22px',
-            marginTop: '15px'
+            margin: '15px 0 0 0'
           }}>
-            User Login
+            Reset Password
           </h1>
 
           <p style={{
             color: '#a1a1aa',
             fontSize: '14px',
-            marginBottom: '20px'
+            margin: '0 0 20px 0',
+            textAlign: 'center',
+            maxWidth: '300px'
           }}>
-            Please login to your account
+            Enter your email address to receive a password reset link
           </p>
 
           <IonInput
@@ -109,99 +127,67 @@ const Login: React.FC = () => {
             labelPlacement="floating"
             fill="outline"
             type="email"
-            placeholder="Enter Email"
+            placeholder="Enter your email"
             value={email}
             onIonChange={e => setEmail(e.detail.value!)}
             style={{
-              color: '#ffffff', // Text inside input
-              '--placeholder-color': '#a1a1aa', // Placeholder color
-              '--color': '#ffffff', // Label color
-              width: '100%',
-              maxWidth: '400px'
-            }}
-          />
-
-          <IonInput
-            label="Password"
-            labelPlacement="floating"
-            fill="outline"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onIonChange={e => setPassword(e.detail.value!)}
-            style={{
-              marginTop: '10px',
-              color: '#ffffff', // Text inside input
+              color: '#ffffff',
               '--placeholder-color': '#a1a1aa',
               '--color': '#ffffff',
               width: '100%',
               maxWidth: '400px'
             }}
-          >
-            <IonInputPasswordToggle slot="end" />
-          </IonInput>
+          />
 
           <IonButton
-            onClick={doLogin}
+            onClick={handleResetPassword}
             expand="full"
             shape="round"
+            disabled={isLoading}
             style={{
               marginTop: '20px',
               width: '100%',
               maxWidth: '400px',
               fontWeight: 'bold',
-              letterSpacing: '1px'
+              '--background': '#3880ff',
+              '--background-activated': '#4d8eff',
+              '--background-focused': '#4d8eff',
+              '--background-hover': '#4d8eff'
             }}
           >
-            LOGIN
+            {isLoading ? 'SENDING...' : 'SEND RESET LINK'}
           </IonButton>
 
           <IonButton
-            routerLink="/it35-lab/register"
-            expand="full"
+            routerLink="/it35-lab"
             fill="clear"
             style={{
-              marginTop: '10px',
               color: '#3880ff',
               textTransform: 'none',
               fontSize: '14px',
-              fontWeight: 'normal'
-            }}
-          >
-            Don't have an account? <b>REGISTER</b>
-          </IonButton>
-
-          <IonButton
-            routerLink="/it35-lab/forgotpassword"
-            expand="full"
-            fill="clear"
-            style={{
-              color: '#a1a1aa',
-              textTransform: 'none',
-              fontSize: '14px',
               fontWeight: 'normal',
-              marginTop: '0'
+              '--background-activated': 'transparent',
+              '--background-focused': 'transparent',
+              '--background-hover': 'transparent'
             }}
           >
-            Forgot Password?
+            Back to  <b style={{ marginLeft: '4px' }}>LOGIN</b>
           </IonButton>
         </div>
 
-        {/* AlertBox */}
         <AlertBox message={alertMessage} isOpen={showAlert} onClose={() => setShowAlert(false)} />
 
-        {/* Toast */}
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
-          message="Login successful! Redirecting..."
-          duration={1500}
+          message="Reset link sent successfully!"
+          duration={2000}
           position="top"
-          color="primary"
+          color="success"
         />
       </IonContent>
     </IonPage>
   );
 };
 
-export default Login;
+export default ForgotPassword;
