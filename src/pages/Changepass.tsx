@@ -7,10 +7,12 @@ import {
   IonInput,
   IonPage,
   IonToast,
-  useIonRouter
+  useIonRouter,
+  IonText,
+  IonProgressBar
 } from '@ionic/react';
 import { logoIonic } from 'ionicons/icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
 const ChangePass: React.FC = () => {
@@ -21,6 +23,49 @@ const ChangePass: React.FC = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    value: 0,
+    label: '',
+    color: ''
+  });
+
+  useEffect(() => {
+    if (newPassword) {
+      const strength = calculatePasswordStrength(newPassword);
+      setPasswordStrength(strength);
+    } else {
+      setPasswordStrength({
+        value: 0,
+        label: '',
+        color: ''
+      });
+    }
+  }, [newPassword]);
+
+  const calculatePasswordStrength = (password: string) => {
+    let strength = 0;
+    
+    // Length check
+    if (password.length >= 8) strength += 1;
+    if (password.length >= 12) strength += 1;
+    
+    // Character variety checks
+    if (/[A-Z]/.test(password)) strength += 1; // Uppercase
+    if (/[a-z]/.test(password)) strength += 1; // Lowercase
+    if (/[0-9]/.test(password)) strength += 1; // Numbers
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1; // Special chars
+    
+    // Determine strength level
+    if (strength <= 2) {
+      return { value: 0.25, label: 'Very Weak', color: 'danger' };
+    } else if (strength <= 4) {
+      return { value: 0.5, label: 'Weak', color: 'warning' };
+    } else if (strength <= 6) {
+      return { value: 0.75, label: 'Strong', color: 'success' };
+    } else {
+      return { value: 1, label: 'Very Strong', color: 'primary' };
+    }
+  };
 
   const handlePasswordUpdate = async () => {
     if (!newPassword || !confirmPassword) {
@@ -127,6 +172,31 @@ const ChangePass: React.FC = () => {
             }}
           />
 
+          {newPassword && (
+            <div style={{ 
+              width: '100%', 
+              maxWidth: '400px',
+              marginTop: '-10px'
+            }}>
+              <IonProgressBar 
+                value={passwordStrength.value} 
+                color={passwordStrength.color}
+                style={{ height: '4px' }}
+              />
+              <IonText 
+                color={passwordStrength.color}
+                style={{ 
+                  fontSize: '12px',
+                  display: 'block',
+                  textAlign: 'right',
+                  marginTop: '4px'
+                }}
+              >
+                {passwordStrength.label}
+              </IonText>
+            </div>
+          )}
+
           <IonInput
             label="Confirm Password"
             labelPlacement="floating"
@@ -139,7 +209,8 @@ const ChangePass: React.FC = () => {
               color: '#ffffff',
               '--placeholder-color': '#a1a1aa',
               width: '100%',
-              maxWidth: '400px'
+              maxWidth: '400px',
+              marginTop: '10px'
             }}
           />
 
@@ -161,6 +232,30 @@ const ChangePass: React.FC = () => {
           >
             {isLoading ? 'UPDATING...' : 'UPDATE PASSWORD'}
           </IonButton>
+
+          <div style={{ 
+            width: '100%', 
+            maxWidth: '400px',
+            marginTop: '-10px',
+            color: '#a1a1aa',
+            fontSize: '12px'
+          }}>
+            <p>Password should contain:</p>
+            <ul style={{ margin: '5px 0 0 0', paddingLeft: '20px' }}>
+              <li style={{ color: newPassword.length >= 8 ? '#3880ff' : '#a1a1aa' }}>
+                At least 8 characters
+              </li>
+              <li style={{ color: /[A-Z]/.test(newPassword) ? '#3880ff' : '#a1a1aa' }}>
+                One uppercase letter
+              </li>
+              <li style={{ color: /[0-9]/.test(newPassword) ? '#3880ff' : '#a1a1aa' }}>
+                One number
+              </li>
+              <li style={{ color: /[^A-Za-z0-9]/.test(newPassword) ? '#3880ff' : '#a1a1aa' }}>
+                One special character
+              </li>
+            </ul>
+          </div>
 
           <IonButton
             routerLink="/it35-lab"
