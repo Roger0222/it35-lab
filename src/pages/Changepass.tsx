@@ -13,42 +13,49 @@ import { logoIonic } from 'ionicons/icons';
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
-const ForgotPassword: React.FC = () => {
+const ChangePass: React.FC = () => {
   const navigation = useIonRouter();
-  const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleResetPassword = async () => {
-    if (!email) {
-      setAlertMessage("Please enter your email address");
+  const handlePasswordUpdate = async () => {
+    if (!newPassword || !confirmPassword) {
+      setAlertMessage("Please fill in all password fields");
       setShowAlert(true);
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setAlertMessage("Please enter a valid email address");
+    if (newPassword !== confirmPassword) {
+      setAlertMessage("Passwords do not match");
+      setShowAlert(true);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setAlertMessage("Password must be at least 6 characters");
       setShowAlert(true);
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/it35-lab/changepassword`,
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
       });
 
       if (error) throw error;
 
       setShowToast(true);
-      setAlertMessage("Password reset link sent. Check your email to proceed.");
+      setAlertMessage("Password updated successfully!");
       setShowAlert(true);
-      setEmail('');
+      navigation.push('/it35-lab', 'forward', 'replace');
     } catch (error: any) {
-      setAlertMessage(error.message || "Failed to send reset link.");
+      setAlertMessage(error.message || "Password update failed");
       setShowAlert(true);
     } finally {
       setIsLoading(false);
@@ -91,7 +98,7 @@ const ForgotPassword: React.FC = () => {
             fontSize: '22px',
             margin: '15px 0 0 0'
           }}>
-            Reset Password
+            Set New Password
           </h1>
 
           <p style={{
@@ -101,28 +108,43 @@ const ForgotPassword: React.FC = () => {
             textAlign: 'center',
             maxWidth: '300px'
           }}>
-            Enter your email to receive a reset link
+            Enter your new password below
           </p>
 
           <IonInput
-            label="Email"
+            label="New Password"
             labelPlacement="floating"
             fill="outline"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onIonChange={e => setEmail(e.detail.value!)}
+            type="password"
+            placeholder="Enter new password"
+            value={newPassword}
+            onIonChange={e => setNewPassword(e.detail.value!)}
             style={{
               color: '#ffffff',
               '--placeholder-color': '#a1a1aa',
-              '--color': '#ffffff',
+              width: '100%',
+              maxWidth: '400px'
+            }}
+          />
+
+          <IonInput
+            label="Confirm Password"
+            labelPlacement="floating"
+            fill="outline"
+            type="password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onIonChange={e => setConfirmPassword(e.detail.value!)}
+            style={{
+              color: '#ffffff',
+              '--placeholder-color': '#a1a1aa',
               width: '100%',
               maxWidth: '400px'
             }}
           />
 
           <IonButton
-            onClick={handleResetPassword}
+            onClick={handlePasswordUpdate}
             expand="full"
             shape="round"
             disabled={isLoading}
@@ -137,21 +159,7 @@ const ForgotPassword: React.FC = () => {
               '--background-hover': '#4d8eff'
             }}
           >
-            {isLoading ? 'SENDING...' : 'SEND RESET LINK'}
-          </IonButton>
-
-          <IonButton
-            routerLink="/it35-lab/changepassword"
-            fill="clear"
-            style={{
-              color: '#3880ff',
-              textTransform: 'none',
-              fontSize: '14px',
-              fontWeight: 'normal',
-              '--background-activated': 'transparent'
-            }}
-          >
-            Already have a code? <b>Change Password</b>
+            {isLoading ? 'UPDATING...' : 'UPDATE PASSWORD'}
           </IonButton>
 
           <IonButton
@@ -180,7 +188,7 @@ const ForgotPassword: React.FC = () => {
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
-          message="Reset link sent!"
+          message="Password updated!"
           duration={2000}
           position="top"
           color="success"
@@ -190,4 +198,4 @@ const ForgotPassword: React.FC = () => {
   );
 };
 
-export default ForgotPassword;
+export default ChangePass;

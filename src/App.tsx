@@ -35,6 +35,7 @@ import Login from './pages/Login';
 import Menu from './pages/Menu';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import ChangePass from './pages/Changepass';
 
 setupIonicReact();
 
@@ -45,6 +46,7 @@ const App: React.FC = () => (
       <Route exact path="/it35-lab" component={Login} />
       <Route exact path="/it35-lab/register" component={Register} />
       <Route exact path="/it35-lab/forgotpassword" component={ForgotPassword} />
+      <Route exact path="/it35-lab/changepassword" component={ChangePass} />
       <Route path="/it35-lab/app" component={Menu} />
       </IonRouterOutlet>
     </IonReactRouter>
