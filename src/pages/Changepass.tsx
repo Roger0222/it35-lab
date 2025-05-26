@@ -28,6 +28,54 @@ const ChangePass: React.FC = () => {
     label: '',
     color: ''
   });
+  const [email, setEmail] = useState<string>('');
+  const [token, setToken] = useState<string>('');
+
+  // Extract email and token from URL parameters
+  useEffect(() => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const emailParam = urlParams.get('email');
+    const tokenParam = urlParams.get('token');
+
+    if (emailParam) {
+      setEmail(decodeURIComponent(emailParam));
+    }
+    if (tokenParam) {
+      setToken(tokenParam);
+    }
+
+    // Verify token validity (you might need to implement this with your backend)
+    verifyToken(emailParam, tokenParam);
+  }, []);
+
+  const verifyToken = async (email: string | null, token: string | null) => {
+    if (!email || !token) {
+      setAlertMessage("Invalid password reset link");
+      setShowAlert(true);
+      return;
+    }
+
+    // Here you would typically verify the token with your backend
+    // For Supabase, you might use their password recovery flow instead
+    setIsLoading(true);
+    try {
+      // Example verification (replace with your actual implementation)
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'recovery'
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      setAlertMessage("Invalid or expired reset link. Please request a new one.");
+      setShowAlert(true);
+      navigation.push('/login', 'root', 'replace');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (newPassword) {
@@ -45,26 +93,17 @@ const ChangePass: React.FC = () => {
   const calculatePasswordStrength = (password: string) => {
     let strength = 0;
     
-    // Length check
     if (password.length >= 8) strength += 1;
     if (password.length >= 12) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
     
-    // Character variety checks
-    if (/[A-Z]/.test(password)) strength += 1; // Uppercase
-    if (/[a-z]/.test(password)) strength += 1; // Lowercase
-    if (/[0-9]/.test(password)) strength += 1; // Numbers
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1; // Special chars
-    
-    // Determine strength level
-    if (strength <= 2) {
-      return { value: 0.25, label: 'Very Weak', color: 'danger' };
-    } else if (strength <= 4) {
-      return { value: 0.5, label: 'Weak', color: 'warning' };
-    } else if (strength <= 6) {
-      return { value: 0.75, label: 'Strong', color: 'success' };
-    } else {
-      return { value: 1, label: 'Very Strong', color: 'primary' };
-    }
+    if (strength <= 2) return { value: 0.25, label: 'Very Weak', color: 'danger' };
+    if (strength <= 4) return { value: 0.5, label: 'Weak', color: 'warning' };
+    if (strength <= 6) return { value: 0.75, label: 'Strong', color: 'success' };
+    return { value: 1, label: 'Very Strong', color: 'primary' };
   };
 
   const handlePasswordUpdate = async () => {
@@ -89,7 +128,8 @@ const ChangePass: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      // For Supabase password recovery flow
+      const { data, error } = await supabase.auth.updateUser({
         password: newPassword
       });
 
@@ -98,9 +138,12 @@ const ChangePass: React.FC = () => {
       setShowToast(true);
       setAlertMessage("Password updated successfully!");
       setShowAlert(true);
-      navigation.push('/it35-lab', 'forward', 'replace');
+      
+      // Sign out and redirect to login
+      await supabase.auth.signOut();
+      navigation.push('/it35-lab', 'root', 'replace');
     } catch (error: any) {
-      setAlertMessage(error.message || "Password update failed");
+      setAlertMessage(error.message || "Password update failed. Please try again.");
       setShowAlert(true);
     } finally {
       setIsLoading(false);
@@ -121,40 +164,23 @@ const ChangePass: React.FC = () => {
         }}>
           <IonAvatar
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               width: '150px',
               height: '150px',
-              borderRadius: '50%',
-              overflow: 'hidden',
               backgroundColor: '#2c2c2e'
             }}
           >
-            <IonIcon
-              icon={logoIonic}
-              style={{ fontSize: '120px', color: '#3880ff' }}
-            />
+            <IonIcon icon={logoIonic} style={{ fontSize: '120px', color: '#3880ff' }} />
           </IonAvatar>
 
-          <h1 style={{
-            color: '#ffffff',
-            fontWeight: 'bold',
-            fontSize: '22px',
-            margin: '15px 0 0 0'
-          }}>
+          <h1 style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '22px' }}>
             Set New Password
           </h1>
 
-          <p style={{
-            color: '#a1a1aa',
-            fontSize: '14px',
-            margin: '0 0 20px 0',
-            textAlign: 'center',
-            maxWidth: '300px'
-          }}>
-            Enter your new password below
-          </p>
+          {email && (
+            <p style={{ color: '#a1a1aa', fontSize: '14px' }}>
+              For: {email}
+            </p>
+          )}
 
           <IonInput
             label="New Password"
@@ -165,33 +191,21 @@ const ChangePass: React.FC = () => {
             value={newPassword}
             onIonChange={e => setNewPassword(e.detail.value!)}
             style={{
-              color: '#ffffff',
-              '--placeholder-color': '#a1a1aa',
               width: '100%',
-              maxWidth: '400px'
+              maxWidth: '400px',
+              color: '#ffffff',
+              '--placeholder-color': '#a1a1aa'
             }}
           />
 
           {newPassword && (
-            <div style={{ 
-              width: '100%', 
-              maxWidth: '400px',
-              marginTop: '-10px'
-            }}>
+            <div style={{ width: '100%', maxWidth: '400px', marginTop: '-10px' }}>
               <IonProgressBar 
                 value={passwordStrength.value} 
                 color={passwordStrength.color}
                 style={{ height: '4px' }}
               />
-              <IonText 
-                color={passwordStrength.color}
-                style={{ 
-                  fontSize: '12px',
-                  display: 'block',
-                  textAlign: 'right',
-                  marginTop: '4px'
-                }}
-              >
+              <IonText color={passwordStrength.color} style={{ fontSize: '12px' }}>
                 {passwordStrength.label}
               </IonText>
             </div>
@@ -206,11 +220,10 @@ const ChangePass: React.FC = () => {
             value={confirmPassword}
             onIonChange={e => setConfirmPassword(e.detail.value!)}
             style={{
-              color: '#ffffff',
-              '--placeholder-color': '#a1a1aa',
               width: '100%',
               maxWidth: '400px',
-              marginTop: '10px'
+              color: '#ffffff',
+              '--placeholder-color': '#a1a1aa'
             }}
           />
 
@@ -220,14 +233,10 @@ const ChangePass: React.FC = () => {
             shape="round"
             disabled={isLoading}
             style={{
-              marginTop: '20px',
               width: '100%',
               maxWidth: '400px',
               fontWeight: 'bold',
-              '--background': '#3880ff',
-              '--background-activated': '#4d8eff',
-              '--background-focused': '#4d8eff',
-              '--background-hover': '#4d8eff'
+              '--background': '#3880ff'
             }}
           >
             {isLoading ? 'UPDATING...' : 'UPDATE PASSWORD'}
@@ -236,12 +245,11 @@ const ChangePass: React.FC = () => {
           <div style={{ 
             width: '100%', 
             maxWidth: '400px',
-            marginTop: '-10px',
             color: '#a1a1aa',
             fontSize: '12px'
           }}>
             <p>Password should contain:</p>
-            <ul style={{ margin: '5px 0 0 0', paddingLeft: '20px' }}>
+            <ul style={{ paddingLeft: '20px' }}>
               <li style={{ color: newPassword.length >= 8 ? '#3880ff' : '#a1a1aa' }}>
                 At least 8 characters
               </li>
@@ -256,20 +264,6 @@ const ChangePass: React.FC = () => {
               </li>
             </ul>
           </div>
-
-          <IonButton
-            routerLink="/it35-lab"
-            fill="clear"
-            style={{
-              color: '#3880ff',
-              textTransform: 'none',
-              fontSize: '14px',
-              fontWeight: 'normal',
-              '--background-activated': 'transparent'
-            }}
-          >
-            Back to <b>LOGIN</b>
-          </IonButton>
         </div>
 
         <IonAlert
@@ -283,7 +277,7 @@ const ChangePass: React.FC = () => {
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
-          message="Password updated!"
+          message="Password updated successfully!"
           duration={2000}
           position="top"
           color="success"

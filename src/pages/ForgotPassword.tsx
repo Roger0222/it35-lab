@@ -141,20 +141,6 @@ const ForgotPassword: React.FC = () => {
           </IonButton>
 
           <IonButton
-            routerLink="/it35-lab/changepassword"
-            fill="clear"
-            style={{
-              color: '#3880ff',
-              textTransform: 'none',
-              fontSize: '14px',
-              fontWeight: 'normal',
-              '--background-activated': 'transparent'
-            }}
-          >
-            Already have a code? <b>Change Password</b>
-          </IonButton>
-
-          <IonButton
             routerLink="/it35-lab"
             fill="clear"
             style={{
